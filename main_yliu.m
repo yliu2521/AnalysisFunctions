@@ -16,9 +16,9 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
-for phi_E = 0.8:0.1:1.2
-    for phi_I = 0.8:0.1:1.2
-for STD_on = [1 0]
+for phi_E = 1.4
+    for phi_I = 1.3
+for STD_on = [0]
 discard_transient = 10; % ms
 for EE_factor = [0.5 ]; % 0.6?
     for II_factor = [0.7 ]
@@ -45,7 +45,7 @@ for EE_factor = [0.5 ]; % 0.6?
                             
                             hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000
                             
-                            [ll_matrix, N_e, ~] = spatial_embed_network_yl(hw, P0_init, degree_CV, tau_c);
+                            [ll_matrix, N_e, ~] = spatial_embed_network(hw, P0_init, degree_CV, tau_c);
                             [I_e,J_e,~] = find(ll_matrix);
                             
                             A = sparse(I_e,J_e, ones(size(I_e)));
@@ -73,7 +73,7 @@ for EE_factor = [0.5 ]; % 0.6?
                             % write pop para
                             for pop_ind = 1:Num_pop
                                 writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
-                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength*ones(1,N(pop_ind)), 0*ones(1,N(pop_ind)));
+                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength*ones(1,N(pop_ind)), 0.1*I_ext_strength*ones(1,N(pop_ind)));
                             end
                             
                             % write synapse para
