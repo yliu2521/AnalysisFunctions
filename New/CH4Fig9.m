@@ -104,18 +104,19 @@ ylim([-0.6,0.6]) % ([-1,1]) % ([-17 -15])
 xlabel('x')
 ylabel('y')
 %%
-subplot(2,2,2)
+% subplot(2,2,2)
+figure
 Color = [0.93 0.69 0.13;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1;0 0 0];
 i = 1;
 edges = -1.5:0.05:1.5;
-[N,edges] = histcounts(Ceny{i}(:),edges,'Normalization','probability'); % ,edges
+[N,edges] = histcounts([Ceny{i,1:20}],edges,'Normalization','probability'); % ,edges % Ceny{i}(:)
 edges = (edges(1:end-1)+edges(2:end))/2;
 plot(edges,N,'o','color',Color(i,:))
 hold on
 edges = -1.5:0.05:1.5;
-[N,edges] = histcounts(Ceny{i}(:),edges,'Normalization','probability'); % ,edges
+[N,edges] = histcounts([Ceny{i,1:20}],edges,'Normalization','probability'); % ,edges % Ceny{i}(:)
 edges = (edges(1:end-1)+edges(2:end))/2;
-pd = fitdist(Ceny{i}(:),'Normal')
+pd = fitdist([Ceny{i,1:20}]','stable') % Ceny{i}(:)
 y = pdf(pd,edges);
 plot(edges,y/sum(y),'-','color',Color(i,:));
 xlabel('y-Error','fontSize',10)
@@ -129,8 +130,8 @@ ylabel('Probability','fontSize',10)
 % plot(p,xN,'b.',p,y/sum(y),'r--','MarkerSize',8,'LineWidth',2)
 % xlabel('Position on x axis','fontSize',10)
 % ylabel('Probability','fontSize',10)
-text(-0.1,1,'B','Units', 'Normalized','fontSize',12)
-%
+% text(-0.1,1,'B','Units', 'Normalized','fontSize',12)
+%%
 subplot(2,2,3)
 Color = [0.93 0.69 0.13;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1;0 0 0];
 heiy = zeros(1,7);
@@ -187,15 +188,16 @@ text(-0.1,1,'C','Units', 'Normalized','fontSize',12)
 % xlabel('Loading Items','fontSize',10)
 % ylabel('Mean Recall Duration(s)','fontSize',10)
 % text(-0.1,1,'C','Units', 'Normalized','fontSize',12)
-subplot(2,2,4)
+% subplot(2,2,4)
 STDymat = zeros(7,10);
+STDy = zeros(1,7);
 for i = 1:7 % :7
     group = 1:floor(length(Ceny{i}(:))/10):length(Ceny{i}(:));
     pd = fitdist(Ceny{i}(:),'Normal');
-    STDy(i) = 1/pd.sigma^2;
+    STDy(i) = pd.sigma; % 1/pd.sigma^2;
     for j = 1:length(group)-1
     pd = fitdist(Ceny{i}(group(j):group(j+1))','Normal'); % 'Normal'
-    STDymat(i,j) = 1/pd.sigma^2;
+    STDymat(i,j) = pd.sigma; % 1/pd.sigma^2;
     end
 end
 IE = 1:7;
@@ -209,8 +211,8 @@ y2 = 10^v2(2)*x2.^v2(1);
 hold on
 plot(x2,y2,'LineWidth',1.5)
 xlabel('WM items','fontSize',10)
-ylabel('Precision','fontSize',10)
-legend('precision','power-law fit')
+ylabel('SD','fontSize',10) % Precision
+legend('sd','power-law fit') % precision
 text(-0.1,1,'D','Units', 'Normalized','fontSize',12)
 %%
 set(gcf, 'PaperPositionMode', 'auto'); % this is the trick!

@@ -207,9 +207,9 @@ ylabel('{\itP} (d(\tau))','fontsize',8)
 legend({'\tau = 2 ms','\tau = 4 ms','\tau = 8 ms','\tau = 16 ms','\tau = 32 ms',},'fontsize',8,'edgecolor','none','color','none')
 text(-0.2,1.02,'E','Units', 'Normalized','FontSize',12)
 %%
-ax=axes('Position',[0.85 0.35 0.1 0.1],'Unit','normalize',...
-    'parent',1);
-box on
+% ax=axes('Position',[0.85 0.35 0.1 0.1],'Unit','normalize',...
+%     'parent',1);
+% box on
 Dis = [];
 for delta = 1:length(deltaTime)
     deltaT = deltaTime(delta) ;
@@ -229,7 +229,7 @@ for delta = 1:length(deltaTime)
         end
     end
     rmsd = deltaT^eta;
-%     Displace = sqrt(Displace);
+    Displace = Displace(Displace>0);
     Displace = Displace/rmsd;
     nEdge = logspace(log10(min(Displace)),log10(max(Displace)),20) ;
     [n,nEdge] = histcounts(Displace,nEdge,'normalization','probability');
@@ -270,7 +270,8 @@ for i = 1:num_files
     Interval = [Interval R.centInterval(2:end)]; % R.centInterval(2:end)]; % R.distCent(2:end)]; % R.Duration]; % R.patternScale;
 end
 %%
-subplot(2,4,3)
+% subplot(2,4,3)
+figure
 Signal = Duration; % Interval(Interval > 0); % [-Interval,Interval]; % Duration; % [-Duration,Duration]
 % numPts = 20;
 % nEdge = logspace(log10(min(Signal)),log10(max(Signal)),numPts) ;
@@ -315,7 +316,49 @@ text(-0.2,1.02,'B','Units', 'Normalized','FontSize',12)
 % xlim([10 4e2])
 % ylim([6e-6 1])
 % set(gca,'XTickLabel',[],'YTickLabel',[])
-
+%%
+figure
+Signal = Duration;
+[N,edges] = histcounts(Signal,50,'normalization','cdf');
+Y = (edges(1:end-1)+edges(2:end))/2;
+loglog(Y,1-N,'.','MarkerSize',12) % semilogy(Y,N/sum(N),'.','MarkerSize',10)
+% Signal = [-Signal,Signal];
+pd = fitdist(Signal','Stable')
+y = cdf(pd,Y);% 2*  *(Y(2)-Y(1))
+hold on
+loglog(Y,1-y,'r','LineWidth',2);
+pd2 = fitdist(Signal','normal')
+y2 = cdf(pd2,Y);% 2*
+hold on
+loglog(Y,1-y2,'k--','LineWidth',2);
+legend({'Data','Levy stable','Gaussian'},'fontsize',8)
+xlim([0 4e2])
+ylim([6e-5 1])
+xlabel('Duration','fontsize',8)
+ylabel('Probability {\itP} ({\itT})','fontsize',8)
+text(-0.2,1.02,'B','Units', 'Normalized','FontSize',12)
+%% Xian's CDF
+sigDist = Duration;
+xmin = min(sigDist) ;
+xmax = max(sigDist) ;
+pf_TP = @(x,alpha) (alpha+1)*(xmax.^(alpha+1)-xmin.^(alpha+1)).^(-1).*x.^(alpha) ;
+cdf_TP = @(x,alpha) (x.^(alpha+1)-xmin.^(alpha+1))./(xmax.^(alpha+1)-xmin.^(alpha+1)) ;
+[lambdaHat1,lambdaCI] = mle(sigDist, 'pdf',pf_TP, 'start',[-4], 'lowerbound',[-5], 'upperbound', [-1])
+figure;
+[x,n] = histcounts(sigDist,1000,'normalization','cdf') ;
+n0 = 0.5*((n(2:end))+(n(1:end-1))) ;
+loglog(n0,1-x,'b.','MarkerSize',12)
+hold on
+loglog(n0,1-cdf_TP(n0,lambdaHat1(1)),'r','lineWidth',2) 
+pd2 = fitdist(sigDist','normal')
+y2 = cdf(pd2,n0);% 2*
+hold on
+loglog(n0,y2,'k--','LineWidth',2);
+legend({'Data','Truncated Pareto','Gaussian'},'fontsize',8)
+xlim([0 4e2])
+ylim([6e-5 0.2])
+xlabel('Duration','fontsize',8)
+ylabel('Probability {\itP} ({\itT})','fontsize',8)
 %%
 % subplot(1,2,1)
 Signal = Duration(Duration > 0); % Interval(Interval > 0); % [-Interval,Interval]; % Duration; % [-Duration,Duration]

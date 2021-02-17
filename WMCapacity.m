@@ -11,7 +11,7 @@ files = cell(1,num_files);
 for id_out = 1:num_files
     files{id_out} = dir_strut(id_out).name;
 end
-bin = 500; % 40; % 4ms
+bin = 40; % 40; % 4ms
 hw = 31;
 [Lattice,~] = lattice_nD(2, hw);
 C = zeros(1,num_files);
@@ -46,7 +46,7 @@ for NumP = 1:7
             fprintf('\t File name: %s\n', files{id_out+100*(NumP-1)});
             R = load(files{id_out+100*(NumP-1)});
             r = sum(movsum(full(R.spike_hist{1}(LoalNeu{no},2.26e4:end)),bin,2));
-            if max(r) >= 120 % floor(0.5*length(LoalNeu{no})) %
+            if max(r) >= floor(0.3*length(LoalNeu{no})) %
                 C(id_out+100*(NumP-1)) = C(id_out+100*(NumP-1)) + 1; % max(r)/length(LoalNeu{no});
             end
         end
@@ -54,12 +54,12 @@ for NumP = 1:7
 end
 C = vec2mat(C,100);
 %
-subplot(1,2,2)
-cap = max(C,[],2); % mean(C,2); % max(C,[],2);
+% subplot(1,2,2)
+cap = mean(C,2); % mean(C,2); % max(C,[],2);
 STD = std(C,0,2);
-% errorbar(1:7,cap,STD,'o-','LineWidth',1.5)
+errorbar(1:7,cap,STD,'o-','LineWidth',1.5)
 % errorbar(1:7,cap,STD,zeros(size(STD)),'o-','LineWidth',1.5)
-plot(1:7,cap,'o-','LineWidth',1.5)
+% plot(1:7,cap,'o-','LineWidth',1.5)
 hold on
 plot(1:7,1:7,'--','LineWidth',1)
 xlabel('Implementing Items','fontSize',10)

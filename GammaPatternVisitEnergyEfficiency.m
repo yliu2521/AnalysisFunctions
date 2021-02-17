@@ -16,92 +16,121 @@ LFP_centre_x = LFP_centre_x(:);
 LFP_centre_y = LFP_centre_y(:);
 r = 0.005;
 mat = zeros(1,130);
+mat2 = zeros(1,130);
+mat3 = zeros(1,130);
 for id_out = 1:130
     fprintf('Processing output file No.%d out of %d...\n', id_out, num_files);
     fprintf('\t File name: %s\n', files{id_out});
     R = load(files{id_out});
-    %     % spike
-    %     R.step_tot = length(R.num_spikes{1});
-    %     R.dt = 0.1;
-    %     R.N = [3969 1000];
-    %     [spike_hist_compressed,~] = find(R.spike_hist{1});
-    %     R.spike_hist_compressed{1} = spike_hist_compressed';
-    %     R = get_grid_firing_centreYL(R);
+    % spike
+%     R.step_tot = length(R.num_spikes{1});
+%     R.dt = 0.1;
+%     R.N = [3969 1000];
+%     [spike_hist_compressed,~] = find(R.spike_hist{1});
+%     R.spike_hist_compressed{1} = spike_hist_compressed';
+%     R = get_grid_firing_centreYL(R);
+%     R = {R};
+%     SaveRYG(R);
+%     R = R{1};
+%     disp('Done');
     
-    % LFP
-    th = 20; % prctile(R.LFP.LFP_gamma_hilbert_abs(:,500:end),95,'all');
-    interval = 1e3; % ms
-    count = 0;
+%     % LFP
+%     th = 20; % prctile(R.LFP.LFP_gamma_hilbert_abs(:,500:end),95,'all');
+%     interval = 1e3; % ms
+%     count = 0;
     
     Ave = [];
+    Ave2 = [];
+    Ave3 = [];
     
-    % LFP
-    for i = 500:interval:length(R.LFP.LFP_gamma_hilbert_abs)-interval
-        ind = i:i+interval-1;
-        LFP_gamma = R.LFP.LFP_gamma_hilbert_abs(:,ind);
-        LFP_gamma(LFP_gamma<th) = 0;
-        WCentroid = [];
-        for j = 1:interval
-            LFP_gamma_hilbert_abs = LFP_gamma(:,j);
-            s = size(LFP_gamma_hilbert_abs);
-            LFP_gamma_hilbert_abs = reshape(LFP_gamma_hilbert_abs,sqrt(s(1)),sqrt(s(1))); % Actually no need to flip, sth legacy.
-            s = size(LFP_gamma_hilbert_abs);
-            sigBinary = LFP_gamma_hilbert_abs;
-            sigBinary(sigBinary > 0) = 1;
-            CC = bwconncomp(sigBinary,6);
-            per = [1 1];
-            CC = CC2periodic(CC,per);
-            if ~isempty(CC.PixelIdxList)
-                if length(CC.PixelIdxList) > 1
-                    count = count + 1;
-                    [~,I] = sort(cellfun('length',CC.PixelIdxList),'descend');
-                    CC.PixelIdxList{1} = CC.PixelIdxList{I};
-                end
-                currentIdx = CC.PixelIdxList{1};
-                burstIdxTemp = zeros(s) ;
-                burstIdxTemp(currentIdx) = 1 ;
-                sigBinary = sigBinary.*burstIdxTemp ;
-                LFP_gamma_hilbert_abs = sigBinary.*LFP_gamma_hilbert_abs;
-                [~,I] = max(LFP_gamma_hilbert_abs(:));
-                [I_row, I_col] = ind2sub(s,I);
-                LFP_gamma_hilbert_abs = circshift(LFP_gamma_hilbert_abs,[round(s(1)/2)-I_row  round(s(2)/2)-I_col]);
-                sigBinary = circshift(sigBinary,[round(s(1)/2)-I_row  round(s(2)/2)-I_col]);
-                S = regionprops(sigBinary,LFP_gamma_hilbert_abs,'WeightedCentroid');
-                WCentroid = [WCentroid; S.WeightedCentroid-[round(s(1)/2)-I_row round(s(2)/2)-I_col]];
-            end
-        end
-        if ~isempty(WCentroid)
-            [~,I] = min(pdist2([LFP_centre_x LFP_centre_y]+32,WCentroid));
-            Visit = sum(ismember(1:length(LFP_centre_x),I))/length(LFP_centre_x);
-        else
-            Visit = 0;
-        end
-        VisitEnergyEfficiency = Visit/(sum(R.num_spikes{1}(ind(1)*10:ind(end)*10))+r*(2*hw+1)^2*interval/50); % unit time 50 ms
-        Ave = [Ave VisitEnergyEfficiency];
-    end
-    
-%     % spike
-%     interval = 2e4; % 0.1 ms
-%     for i = 5e3:interval:R.step_tot-interval
+%     % LFP
+%     for i = 500:interval:length(R.LFP.LFP_gamma_hilbert_abs)-interval
 %         ind = i:i+interval-1;
-%         WCentroid = R.grid.quick.centre(:,round((ind(1)-20)/10):round((ind(end)-20)/10)-1)';
-%         ind = ~isnan(WCentroid(:,1));
-%         WCentroid = WCentroid(ind,:);
-%         [~,I] = min(pdist2([LFP_centre_x LFP_centre_y],WCentroid));
-%         Visit = sum(ismember(1:length(LFP_centre_x),I))/length(LFP_centre_x);
-%         VisitEnergyEfficiency = Visit/(sum(R.num_spikes{1}(ind))+r*(2*hw+1)^2*interval/500); % unit time 50 ms
+%         LFP_gamma = R.LFP.LFP_gamma_hilbert_abs(:,ind);
+%         LFP_gamma(LFP_gamma<th) = 0;
+%         WCentroid = [];
+%         for j = 1:interval
+%             LFP_gamma_hilbert_abs = LFP_gamma(:,j);
+%             s = size(LFP_gamma_hilbert_abs);
+%             LFP_gamma_hilbert_abs = reshape(LFP_gamma_hilbert_abs,sqrt(s(1)),sqrt(s(1))); % Actually no need to flip, sth legacy.
+%             s = size(LFP_gamma_hilbert_abs);
+%             sigBinary = LFP_gamma_hilbert_abs;
+%             sigBinary(sigBinary > 0) = 1;
+%             CC = bwconncomp(sigBinary,6);
+%             per = [1 1];
+%             CC = CC2periodic(CC,per);
+%             if ~isempty(CC.PixelIdxList)
+%                 if length(CC.PixelIdxList) > 1
+%                     count = count + 1;
+%                     [~,I] = sort(cellfun('length',CC.PixelIdxList),'descend');
+%                     CC.PixelIdxList{1} = CC.PixelIdxList{I};
+%                 end
+%                 currentIdx = CC.PixelIdxList{1};
+%                 burstIdxTemp = zeros(s) ;
+%                 burstIdxTemp(currentIdx) = 1 ;
+%                 sigBinary = sigBinary.*burstIdxTemp ;
+%                 LFP_gamma_hilbert_abs = sigBinary.*LFP_gamma_hilbert_abs;
+%                 [~,I] = max(LFP_gamma_hilbert_abs(:));
+%                 [I_row, I_col] = ind2sub(s,I);
+%                 LFP_gamma_hilbert_abs = circshift(LFP_gamma_hilbert_abs,[round(s(1)/2)-I_row  round(s(2)/2)-I_col]);
+%                 sigBinary = circshift(sigBinary,[round(s(1)/2)-I_row  round(s(2)/2)-I_col]);
+%                 S = regionprops(sigBinary,LFP_gamma_hilbert_abs,'WeightedCentroid');
+%                 WCentroid = [WCentroid; S.WeightedCentroid-[round(s(1)/2)-I_row round(s(2)/2)-I_col]];
+%             end
+%         end
+%         if ~isempty(WCentroid)
+%             [~,I] = min(pdist2([LFP_centre_x LFP_centre_y]+32,WCentroid));
+%             Visit = sum(ismember(1:length(LFP_centre_x),I))/length(LFP_centre_x);
+%         else
+%             Visit = 0;
+%         end
+%         VisitEnergyEfficiency = Visit/(sum(R.num_spikes{1}(ind(1)*10:ind(end)*10))+r*(2*hw+1)^2*interval/50); % unit time 50 ms
 %         Ave = [Ave VisitEnergyEfficiency];
 %     end
     
+    % spike
+    interval = 2e4; % 0.1 ms
+    for i = 5e3:interval:R.step_tot-interval
+        ind = i:i+interval-1;
+        WCentroid = R.grid.quick.centre(:,round((ind(1)-20)/10):round((ind(end)-20)/10)-1)';
+        ind2 = ~isnan(WCentroid(:,1));
+        WCentroid = WCentroid(ind2,:);
+        [~,I] = min(pdist2([LFP_centre_x LFP_centre_y],WCentroid));
+        Visit = sum(ismember(1:length(LFP_centre_x),I))/length(LFP_centre_x);
+        VisitEnergyEfficiency = Visit/(sum(R.num_spikes{1}(ind))+r*(2*hw+1)^2*interval/500); % unit time 50 ms
+        Ave = [Ave VisitEnergyEfficiency];
+        Ave2 = [Ave2 Visit];
+        Ave3 = [Ave3 sum(R.num_spikes{1}(ind))+r*(2*hw+1)^2*interval/500];
+    end
+    
     mat(id_out) = mean(Ave);
+    mat2(id_out) = mean(Ave2);
+    mat3(id_out) = mean(Ave3);
     %     fprintf('\t Multiple Patterns:%d\n',count);
     toc;
 end
+subplot(1,3,1)
+mat2 = reshape(mat2,13,[]);
+VEF = mean(mat2,2);
+STD = std(mat2,0,2);
+errorbar(0.7:0.05:1.3,VEF,STD,'o--')
+% plot(0.7:0.05:1.3,VEF,'o-')
+xlabel('IE ratio')
+ylabel('Sampling rate')
+subplot(1,3,2)
+mat3 = reshape(mat3,13,[]);
+VEF = mean(mat3,2);
+STD = std(mat3,0,2);
+errorbar(0.7:0.05:1.3,VEF,STD,'o--')
+% plot(0.7:0.05:1.3,VEF,'o-')
+xlabel('IE ratio')
+ylabel('Energy expenditure')
+subplot(1,3,3)
 mat = reshape(mat,13,[]);
 VEF = mean(mat,2);
 STD = std(mat,0,2);
-errorbar(0.7:0.05:1.3,VEF,STD,'o-')
+errorbar(0.7:0.05:1.3,VEF,STD,'o--')
 % plot(0.7:0.05:1.3,VEF,'o-')
 xlabel('IE ratio')
-ylabel('Visit Energy Efficiency')
+ylabel('Searching efficiency')
 % end

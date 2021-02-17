@@ -11,7 +11,7 @@ end
 % load(dir_strut2.name,'StiNeu');
 hw = 31;
 [Lattice,~] = lattice_nD(2, hw);
-NumP = 4;
+NumP = 3;
 switch NumP
     case 1
         Coor = [0;0];
@@ -79,7 +79,7 @@ W2 = P(:,2);
 % xlabel('Stimulus PC1')
 % ylabel('Stimulus PC2')
 % zlabel('Time(ms)')
-%%
+%
 for t = bin:30:steps-bin % 1:steps % bin/2:steps-bin/2 % 
     %     for i = 1:NumP
     %         X(i,:) = r{i}(:,t) - rmean(:,t);
@@ -92,9 +92,9 @@ for t = bin:30:steps-bin % 1:steps % bin/2:steps-bin/2 %
     for i = 1:NumP
         z1(i,t) = W1'*(r{i}(:,t)-rmean(:,t));
         z2(i,t) = W2'*(r{i}(:,t)-rmean(:,t));
-%         plot3(z1(i,t),z2(i,t),0.1*t,'.','MarkerSize',4,'color',Color(i,:)) % t/steps*
+        plot3(z1(i,t),z2(i,t),0.1*t,'.','MarkerSize',4,'color',Color(i,:)) % t/steps*
 %         hold on
-        plot(z1(i,t),z2(i,t),'.','MarkerSize',4,'color',Color(i,:))
+%         plot(z1(i,t),z2(i,t),'.','MarkerSize',4,'color',Color(i,:))
         grid on
         drawnow
         hold on

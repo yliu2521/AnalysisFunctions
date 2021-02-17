@@ -289,7 +289,8 @@ end
 hw = 31;
 deltaTime = [2 4 8 16 32]; % 30 ;
 Color = [0 0.4470 0.7410;0.8500 0.3250 0.0980;0.9290 0.6940 0.1250;0.4940 0.1840 0.5560;0.4660 0.6740 0.1880];
-subplot(4,2,[7,8])
+figure
+% subplot(4,2,[7,8])
 for delta = 1:3 % length(deltaTime)
     deltaT = deltaTime(delta) ;
     Displace = [] ;
@@ -378,3 +379,40 @@ h(2) = loglog(xbody,y/sum(y),'k--','LineWidth',1);
 xlabel('Displacement d(\tau) (\mum)','fontsize',8) % ('displacement/\eta^{0.5}') ['displacement/\eta^{', num2str(eta),'}']
 ylabel('{\itP} (d(\tau))','fontsize',8)
 legend([h(1) h(2)],{'\alpha stable','Gaussian'},'fontsize',8,'edgecolor','none','color','none')
+%% CDF
+hw = 31;
+deltaTime = [2 4 8 16 32]; % 30 ;
+Color = [0 0.4470 0.7410;0.8500 0.3250 0.0980;0.9290 0.6940 0.1250;0.4940 0.1840 0.5560;0.4660 0.6740 0.1880];
+figure
+for delta = 1:3 % length(deltaTime)
+    deltaT = deltaTime(delta) ;
+    Displace = [] ;
+    for i = 1:num_files % 7:13:num_files % 1:num_files
+        fprintf('Loading 3DBurst.mat file %s...\n', files{i});
+        R = load(files{i});
+        center = R.WCentroids ;
+        for iBurst = 1:size(center,2)
+            posCenter = center{iBurst}(:,2:3);
+            posCenter = posCenter/40*600; %% manually modify here according to electrdoes %%
+            posCenter = posCenter/600*2*pi;
+            posCenter = exp(1i*posCenter);
+            DisplaceTemp = sqrt(sum((angle(posCenter(deltaT+1:end,:)./posCenter(1:end-deltaT,:))/(2*pi)*600).^2,2));
+            Displace = [Displace;DisplaceTemp] ;
+        end
+    end
+    [n,nEdge] = histcounts(Displace,80,'normalization','cdf');
+    x = (nEdge(1:end-1)+nEdge(2:end))/2;
+    h(delta) = loglog(x,1-n,'.','MarkerSize',6,'color',Color(delta,:));
+    hold on;
+    sigDist = Displace; % (Interval>0);
+    xmin = min(sigDist)
+    xmax = max(sigDist)
+    pf_TP = @(x,alpha) (alpha+1)*(xmax.^(alpha+1)-xmin.^(alpha+1)).^(-1).*x.^(alpha) ;
+    cdf_TP = @(x,alpha) (x.^(alpha+1)-xmin.^(alpha+1))./(xmax.^(alpha+1)-xmin.^(alpha+1)) ;
+    [lambdaHat1,lambdaCI] = mle(sigDist, 'pdf',pf_TP, 'start',[-4], 'lowerbound',[-5], 'upperbound', [0])
+    loglog(n0,1-cdf_TP(n0,lambdaHat1(1)),'r','lineWidth',2) 
+    hold on ;
+end
+xlabel('Displacement d(\tau) (\mum)','fontsize',8) % ('displacement/\eta^{0.5}') ['displacement/\eta^{', num2str(eta),'}']
+ylabel('{\itP} (d(\tau))','fontsize',8)
+legend([h(1) h(2) h(3)],{'\tau = 2 ms','\tau = 4 ms','\tau = 8 ms',},'fontsize',8,'edgecolor','none','color','none')

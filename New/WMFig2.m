@@ -4,7 +4,8 @@ figure_hight = 11.4; % cm
 figure('NumberTitle','off','name', 'WMFig2', 'units', 'centimeters', ...
     'color','w', 'position', [0, 0, figure_width, figure_hight], ...
     'PaperSize', [figure_width, figure_hight]); % this is the trick!
-
+%%
+figure
 dir_strut = dir('*_RYG.mat');
 num_files = length(dir_strut);
 files = cell(1,num_files);
@@ -23,7 +24,7 @@ end
 LoalNeu = LocalNeu;
 % LoalNeu = cell(1);
 % LoalNeu{1} = LocalNeu{2};
-id = 11; % :num_files % normal; E; I
+for id = 32:num_files % normal; E; I % 11
 subplot(7,1,[1,2])
 R = load(files{id});
 t_ind = 2.76e4:5e4;
@@ -83,10 +84,10 @@ if i == 1
     text(-0.1,1,'B','Units', 'Normalized','FontSize',12)
 end
 end
-% next = input('\t Next figure?');
-% close all
-% end
-    
+next = input('\t Next figure?');
+close all
+end
+%%    
 set(gcf, 'PaperPositionMode', 'auto'); % this is the trick!
 print -depsc WMFig2 % this is the trick!!
 % end

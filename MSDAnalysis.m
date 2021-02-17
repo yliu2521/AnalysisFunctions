@@ -84,11 +84,11 @@ msdSuper = [] ;
 countSuper = 0 ;
 slopeAll = [] ;
 hw = 31;
-for id_out = 1:num_files
+for id_out = 1:10 % num_files
     fprintf('Processing output file No.%d out of %d...\n', id_out, num_files);
     fprintf('\t File name: %s\n', files{id_out});
     R = load(files{id_out});
-    R = get_grid_firing_centre(R);
+    R = get_grid_firing_centreYL(R);
     R = {R};
     SaveRYG(R);
     disp('Done');
@@ -160,7 +160,7 @@ end
 %     'color','w', 'position', [0, 0, figure_width, figure_hight], ...
 %     'PaperSize', [figure_width, figure_hight]); % this is the trick!
 figure;
-% subplot(1,2,1)
+subplot(1,2,1)
 sigIn = msdSuper ;
 [MSDsort,~,MSDIdx] = unique(sigIn(:,2)) ;
 for idx = 1:length(MSDsort)
@@ -181,14 +181,14 @@ xlabel('\tau (ms)')
 ylabel('Mean Square Distance (um^2)')
 str = ['p = ',num2str(p(1))];
 text(max(tau),max(y),str)
-% text(-0.2,1.02,'A','Units', 'Normalized','FontSize',14,'FontWeight','bold')
-% subplot(1,2,2)
-% hist(slopeAll,40)
-% xlabel('MSD Slope')
-% ylabel('Count')
-% ts = sprintf('Mean Slope = %.4f ', nanmean(slopeAll));
-% title(ts);
-% text(-0.2,1.02,'B','Units', 'Normalized','FontSize',14,'FontWeight','bold')
+text(-0.2,1.02,'A','Units', 'Normalized','FontSize',14,'FontWeight','bold')
+subplot(1,2,2)
+histogram(slopeAll,40)
+xlabel('MSD Slope')
+ylabel('Count')
+ts = sprintf('Mean Slope = %.4f ', nanmean(slopeAll));
+title(ts);
+text(-0.2,1.02,'B','Units', 'Normalized','FontSize',14,'FontWeight','bold')
 
 % set(gcf, 'PaperPositionMode', 'auto'); % this is the trick!
 % print -depsc figure_size_control % this is the trick!! 

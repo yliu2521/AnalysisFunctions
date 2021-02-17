@@ -3,11 +3,11 @@ function main_Gamma_SP3(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 5*sec;
+step_tot = 100*sec;
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
-loop_num = 0;
+loop_num = 82;
 
 tau_ref = 4; % ms
 delay = 4; % ms
@@ -27,7 +27,7 @@ in_out_r = [0.13];
 STD_on = 0;
 SP_on = 1; % need to get two subfunctions consistent
 
-repeats = 1;
+repeats = 100;
 
 for Kw = [1.8] % 2
     for AreaR = [5]
@@ -51,6 +51,8 @@ for Kw = [1.8] % 2
                         Coor = [0 -9.8*sqrt(3) 9.8*sqrt(3) 0 -9.8*sqrt(3) 9.8*sqrt(3) 0;...
                             -19.6 -9.8         -9.8        0 9.8          9.8         19.6];
                 end
+                %                 for dis = [1:3:28]
+                %                     Coor = [-16 15.5-dis;-16 15.5-dis];
                 Stogether = 1;
                 % randsample(N_e,NumP); overlap[513 2497 2503]
                 mean_TV = zeros(NumP+1,step_tot);
@@ -210,19 +212,18 @@ for Kw = [1.8] % 2
                                                                                                     StiNeu = cell(1,NumP);
                                                                                                     for i = 1:NumP
                                                                                                         dist = Distance_xy(Lattice_E(:,1),Lattice_E(:,2),Coor(1,i),Coor(2,i),2*hw+1); %calculates Euclidean distance between centre of lattice and node j in the lattice
-                                                                                                        StiNeu{i} = find(dist<=AreaR)'; % LoadR
-                                                                                                        StiNeu{i} = StiNeu{i}(randperm(length(StiNeu{i}),30));
+                                                                                                        StiNeu{i} = find(dist<=LoadR)'; % LoadR % AreaR
+                                                                                                        % StiNeu{i} = StiNeu{i}(randperm(length(StiNeu{i}),30));
                                                                                                     end
                                                                                                     OutNeu = setdiff(1:N_e,[StiNeu{:}]); % row vector
                                                                                                     sample_neurons = [];
                                                                                                     for i = 1:length(StiNeu)
                                                                                                         sample_neurons = [sample_neurons StiNeu{i}(1)']; % StiNeu{i} column vector
                                                                                                     end
-                                                                                                    size(sample_neurons)
                                                                                                     sample_neurons = [sample_neurons OutNeu(1)];
                                                                                                     
                                                                                                     Mean = 3*ones(1,N_e); % 5
-                                                                                                    start = 2.5e4+1; % 0.1 ms
+                                                                                                    start = 2e4; % 0.1 ms
                                                                                                     for i = 1:NumP
                                                                                                         mean_TV(i,start:(start+0.25e4)) = 1;
                                                                                                         if Stogether == 0
@@ -294,15 +295,20 @@ for Kw = [1.8] % 2
                                                                                                     % LFP_centre_y = linspace(-hw,hw,63);
                                                                                                     % LFP_centre_x = LFP_centre_x([16 47 32 32]); % 4 items
                                                                                                     % LFP_centre_y = LFP_centre_y([16 16 47 32]);
-%                                                                                                     LFP_centre_x = linspace(-hw,hw,9); % E16:9  E100:21 E400:41 E1600:81
-%                                                                                                     LFP_centre_y = linspace(-hw,hw,9);
-%                                                                                                     LFP_centre_x = LFP_centre_x(2:2:8); % E16(2:2:8)  E100(2:2:20) E400(2:2:40) E1600(2:2:80)
-%                                                                                                     LFP_centre_y = LFP_centre_y(2:2:8);
-%                                                                                                     [LFP_centre_x, LFP_centre_y] = meshgrid(LFP_centre_x, LFP_centre_y);
-%                                                                                                     LFP_centre_x = LFP_centre_x(:);
-%                                                                                                     LFP_centre_y = LFP_centre_y(:);
+                                                                                                    % LFP_centre_x = linspace(-hw,hw,9); % E16:9  E100:21 E400:41 E1600:81
+                                                                                                    % LFP_centre_y = linspace(-hw,hw,9);
+                                                                                                    % LFP_centre_x = LFP_centre_x(2:2:8); % E16(2:2:8)  E100(2:2:20) E400(2:2:40) E1600(2:2:80)
+                                                                                                    % LFP_centre_y = LFP_centre_y(2:2:8);
+                                                                                                    % [LFP_centre_x, LFP_centre_y] = meshgrid(LFP_centre_x, LFP_centre_y);
+                                                                                                    % LFP_centre_x = LFP_centre_x(:);
+                                                                                                    % LFP_centre_y = LFP_centre_y(:);
                                                                                                     LFP_centre_x = Coor(1,:);
                                                                                                     LFP_centre_y = Coor(2,:);
+                                                                                                    if length(LFP_centre_x) == 1
+                                                                                                        LFP_centre_x = [LFP_centre_x 62*rand-31];
+                                                                                                        LFP_centre_y = [LFP_centre_y 62*rand-31];
+                                                                                                    end
+                                                                                                    
                                                                                                     for cc = 1:length(LFP_centre_x)
                                                                                                         dist = lattice_nD_find_dist(Lattice, hw, LFP_centre_x(cc) , LFP_centre_y(cc));
                                                                                                         gaus_tmp = 1/(LFP_range_sigma*sqrt(2*pi))*exp(-0.5*(dist/LFP_range_sigma).^2) .* double(dist <= LFP_range_sigma*2.5);
@@ -351,7 +357,8 @@ for Kw = [1.8] % 2
                                                                                                         'NumP',NumP,...
                                                                                                         'AreaR',AreaR,...
                                                                                                         'LoadR',LoadR);
-                                                                                                    %                                                                                                 'backgroundcoe',backgroundcoe);
+                                                                                                    %   'MDis',dis);
+                                                                                                    %   'backgroundcoe',backgroundcoe);
                                                                                                     
                                                                                                     %%% save in_degree and sample neuron data based on in_degree
                                                                                                     % save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
@@ -389,6 +396,7 @@ for Kw = [1.8] % 2
             end
         end
     end
+    %     end
 end
 end
 
